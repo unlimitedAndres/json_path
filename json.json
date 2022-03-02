@@ -1,0 +1,95 @@
+{
+ "$schema": "http://json-schema.org/draft-07/schema#",
+ "definitions": {
+  "Root": {
+   "type": "object",
+   "properties": {
+    "userId": {
+     "description": "The size of the shape.",
+     "minimum": 0,
+     "type": [
+      "integer",
+      "string"
+     ]
+    },
+    "id": {
+     "type": "number"
+    },
+    "title": {
+     "type": "string"
+    },
+    "completed": {
+     "type": "boolean"
+    },
+    "node": {
+     "anyOf": [
+      {
+       "$ref": "#/definitions/Node"
+      },
+      {
+       "type": [
+        "string",
+        "boolean"
+       ]
+      }
+     ]
+    },
+    "myarray": {
+     "anyOf": [
+      {
+       "type": "array",
+       "items": {
+        "type": "string"
+       }
+      },
+      {
+       "type": "array",
+       "items": {
+        "type": "boolean"
+       }
+      },
+      {
+       "type": "string"
+      }
+     ]
+    }
+   },
+   "required": [
+    "completed",
+    "id",
+    "myarray",
+    "node",
+    "title",
+    "userId"
+   ]
+  },
+  "Node": {
+   "type": "object",
+   "properties": {
+    "userId2": {
+     "description": "The size of the shape.",
+     "minimum": 0,
+     "type": [
+      "integer",
+      "string"
+     ]
+    },
+    "id2": {
+     "type": "number"
+    },
+    "title2": {
+     "type": "string"
+    },
+    "completed2": {
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "completed2",
+    "id2",
+    "title2",
+    "userId2"
+   ]
+  }
+ }
+}

@@ -1,0 +1,59 @@
+$.definitions[?(@.type)]
+
+$.definitions[?(@.type)]..properties[?(@.type || @.anyOf)]
+$.definitions[?(@.type)]..properties[?(@.type || @.anyOf)].title
+$.definitions[?(@.type)]..properties[?(@.type || @.anyOf)].description
+$.definitions[?(@.type)]..properties[?(['integer','number','boolean','string','object','array'].includes(@.type))]
+$.definitions[?(@.type)]..properties[?(['integer','number','boolean','string','object','array'].includes(@.type))].type
+
+$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf
+$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number','boolean','string','object','array'].includes(@.type))]
+$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number','boolean','string','object','array'].includes(@.type))].type
+
+// integers and numbers
+$.definitions[?(@.type)]..properties[?(['integer','number'].includes(@.type))].minimum
+$.definitions[?(@.type)]..properties[?(['integer','number'].includes(@.type))].maximum
+$.definitions[?(@.type)]..properties[?(['integer','number'].includes(@.type))].multipleOf
+$.definitions[?(@.type)]..properties[?(['integer','number'].includes(@.type))].exclusiveMaximum
+$.definitions[?(@.type)]..properties[?(['integer','number'].includes(@.type))].exclusiveMinimum
+$.definitions[?(@.type)]..properties[?(['integer','number'].includes(@.type))].maximum
+$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number'].includes(@.type))].minimum
+$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number'].includes(@.type))].exclusiveMinimum
+$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number'].includes(@.type))].exclusiveMaximum
+$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number'].includes(@.type))].multipleOf
+$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number'].includes(@.type))].minimum
+$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number'].includes(@.type))].maximum
+
+$.definitions[?(@.type)]..properties[?(['integer','number','boolean','string','object','array'].includes(@.type))].readOnly
+$.definitions[?(@.type)]..properties[?(['integer','number','boolean','string','object','array'].includes(@.type))].format
+$.definitions[?(@.type)]..properties[?(['integer','number','boolean','string','object','array'].includes(@.type))].writeOnly
+$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number','boolean','string','object','array'].includes(@.type))].readOnly
+$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number','boolean','string','object','array'].includes(@.type))].format
+$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number','boolean','string','object','array'].includes(@.type))].writeOnly
+
+// String
+$.definitions[?(@.type)]..properties[?(['string'].includes(@.type))].minLength
+$.definitions[?(@.type)]..properties[?(['string'].includes(@.type))].maxLength
+$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['string'].includes(@.type))].minLength
+$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['string'].includes(@.type))].maxLength
+
+// Array
+//$..*[?(@property=='type')]@array()
+$.definitions[?(@.type)]..properties[?(['array'].includes(@.type))].items
+$.definitions[?(@.type)]..properties[?(['array'].includes(@.type))].minItems
+$.definitions[?(@.type)]..properties[?(['array'].includes(@.type))].maxItems
+$.definitions[?(@.type)]..properties[?(['array'].includes(@.type))].uniqueItems
+$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['array'].includes(@.type))].uniqueItems
+$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['array'].includes(@.type))].maxItems
+$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['array'].includes(@.type))].minItems
+$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['array'].includes(@.type))].items
+
+// Object
+$.definitions[?(@.type)]..properties[?(['object'].includes(@.type))].maxProperties
+$.definitions[?(@.type)]..properties[?(['object'].includes(@.type))].minProperties
+$.definitions[?(@.type)]..properties[?(['object'].includes(@.type))].additionalProperties
+$.definitions[?(@.type)]..properties[?(['object'].includes(@.type))].properties
+$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['array'].includes(@.type))].properties
+$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['array'].includes(@.type))].additionalProperties
+$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['array'].includes(@.type))].minProperties
+$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['array'].includes(@.type))].maxProperties

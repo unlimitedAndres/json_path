@@ -1,11 +1,16 @@
 const { JSONPath } = require('jsonpath-plus');
 const pointer = require('json-pointer');
 const _ = require('underscore');
+const fs = require('fs');
+const { json } = require('stream/consumers');
+const { object } = require('underscore');
+const resolve = require('path').resolve;
 
 class JsonSchemaToOpenApi {
   constructor() {
     this.convObject = null;
     this.newTypeObject = null;
+    this.schema = null;
     this.allowedContructs = ['not', 'allOf', 'oneOf', 'anyOf'];
     this.validConstraintKeywords = [
       'not',
@@ -50,56 +55,151 @@ class JsonSchemaToOpenApi {
       'maxProperties'
     ];
     this.properties = {
-      string: ['minLength', 'maxLength', 'required', 'format'],
+      string: ['minLength', 'maxLength', 'format'],
       number: [
         'multipleOf',
         'exclusiveMaximum',
         'exclusiveMinimum',
         'maximum',
-        'minimum',
-        'required'
+        'minimum'
       ],
       integer: [
         'multipleOf',
         'exclusiveMaximum',
         'exclusiveMinimum',
         'maximum',
-        'minimum',
-        'required'
-      ]
+        'minimum'
+      ],
+      array: ['uniqueItems', 'maxItems', 'minItems', 'items'],
+      object: ['maxProperties', 'minProperties', 'additionalProperties']
     };
+    this.paths = [
+      '$.definitions[?(@.type)]..properties[?(@.type || @.anyOf)]',
+      '$.definitions[?(@.type)]..properties[?(@.type || @.anyOf)].title',
+      '$.definitions[?(@.type)]..properties[?(@.type || @.anyOf)].description',
+      "$.definitions[?(@.type)]..properties[?(['integer','number','boolean','string','object','array'].includes(@.type))]",
+      "$.definitions[?(@.type)]..properties[?(['integer','number','boolean','string','object','array'].includes(@.type))].type",
+      '$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf',
+      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number','boolean','string','object','array'].includes(@.type))]",
+      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number','boolean','string','object','array'].includes(@.type))].type",
 
-    // // validar los atributos del objeto
+      "$.definitions[?(@.type)]..properties[?(['integer','number'].includes(@.type))].minimum",
+      "$.definitions[?(@.type)]..properties[?(['integer','number'].includes(@.type))].maximum",
+      "$.definitions[?(@.type)]..properties[?(['integer','number'].includes(@.type))].multipleOf",
+      "$.definitions[?(@.type)]..properties[?(['integer','number'].includes(@.type))].exclusiveMaximum",
+      "$.definitions[?(@.type)]..properties[?(['integer','number'].includes(@.type))].exclusiveMinimum",
+      "$.definitions[?(@.type)]..properties[?(['integer','number'].includes(@.type))].maximum",
+      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number'].includes(@.type))].minimum",
+      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number'].includes(@.type))].exclusiveMinimum",
+      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number'].includes(@.type))].exclusiveMaximum",
+      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number'].includes(@.type))].multipleOf",
+      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number'].includes(@.type))].minimum",
+      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number'].includes(@.type))].maximum",
+
+      "$.definitions[?(@.type)]..properties[?(['string'].includes(@.type))].minLength",
+      "$.definitions[?(@.type)]..properties[?(['string'].includes(@.type))].maxLength",
+      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['string'].includes(@.type))].minLength",
+      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['string'].includes(@.type))].maxLength",
+
+      "$.definitions[?(@.type)]..properties[?(['array'].includes(@.type))].items",
+      "$.definitions[?(@.type)]..properties[?(['array'].includes(@.type))].minItems",
+      "$.definitions[?(@.type)]..properties[?(['array'].includes(@.type))].maxItems",
+      "$.definitions[?(@.type)]..properties[?(['array'].includes(@.type))].uniqueItems",
+      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['array'].includes(@.type))].uniqueItems",
+      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['array'].includes(@.type))].maxItems",
+      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['array'].includes(@.type))].minItems",
+      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['array'].includes(@.type))].items",
+
+      "$.definitions[?(@.type)]..properties[?(['object'].includes(@.type))].maxProperties",
+      "$.definitions[?(@.type)]..properties[?(['object'].includes(@.type))].minProperties",
+      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['array'].includes(@.type))].minProperties",
+      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['array'].includes(@.type))].maxProperties"
+    ];
+
+    // Generar archivo .json
+    this.createFile();
+
+    // validar los atributos del objeto
     // this.purgeObject();
 
     // // validar los atributos de properties
     // this.validateProperties();
   }
 
-  purgeObject() {
-    const values = [];
-    const all = JSONPath({
-      path: `$..*`,
-      json: schema,
-      resultType: 'all'
+  createFile() {
+    const TJS = require('typescript-json-schema');
+    //import * as TJS from "typescript-json-schema";
+
+    const settings = (TJS.PartialArgs = {
+      required: true
     });
 
-    validKeywords.forEach((e) => {
+    const compilerOptions = (TJS.CompilerOptions = {
+      strictNullChecks: true
+    });
+
+    const program = TJS.getProgramFromFiles(
+      [resolve('test.ts')],
+      compilerOptions
+    );
+
+    const schema = TJS.generateSchema(program, '*', settings);
+
+    fs.writeFileSync('./json.json', JSON.stringify(schema, null, ' '));
+  }
+
+  purgeObject(schema) {
+    const paths = [];
+    for (const property in this.properties) {
+      this.properties[property].forEach((e) => {
+        paths.push(
+          `$.definitions[?(@.type)]..properties[?(['${property}'].includes(@.type))].${e}`
+        );
+        paths.push(
+          `$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['${property}'].includes(@.type))].${e}`
+        );
+      });
+    }
+    paths.push(
+      '$.definitions[?(@.type)]..properties[?(@.type || @.anyOf)]',
+      '$.definitions[?(@.type)]..properties[?(@.type || @.anyOf)].title',
+      '$.definitions[?(@.type)]..properties[?(@.type || @.anyOf)].description',
+      "$.definitions[?(@.type)]..properties[?(['integer','number','boolean','string','object','array'].includes(@.type))]",
+      "$.definitions[?(@.type)]..properties[?(['integer','number','boolean','string','object','array'].includes(@.type))].type",
+      '$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf',
+      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number','boolean','string','object','array'].includes(@.type))]",
+      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number','boolean','string','object','array'].includes(@.type))].type",
+      // "$.definitions[?(@.type)]..properties[?(['integer','number','boolean','string','object','array'].includes(@.type))].readOnly",
+      // "$.definitions[?(@.type)]..properties[?(['integer','number','boolean','string','object','array'].includes(@.type))].format",
+      // "$.definitions[?(@.type)]..properties[?(['integer','number','boolean','string','object','array'].includes(@.type))].writeOnly",
+      // "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number','boolean','string','object','array'].includes(@.type))].readOnly",
+      // "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number','boolean','string','object','array'].includes(@.type))].format",
+      // "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number','boolean','string','object','array'].includes(@.type))].writeOnly"
+    );
+    // console.log(JSON.stringify(schema, null, ' '));
+    // console.log(paths);
+    const values = [];
+    paths.forEach((e) => {
       const valid = JSONPath({
-        path: `$..${e}.*`,
+        path: e,
         json: schema,
-        resultType: 'all'
+        resultType: 'pointer'
       });
       if (valid.length) {
-        valid.forEach((e) => {
-          !values.includes(e.pointer) ? values.push(e.pointer) : false;
+        valid.forEach((p) => {
+          !values.includes(p) ? values.push(p) : false;
         });
       }
-      values.reverse();
-
-      console.log(values);
     });
-    console.log(schema);
+
+    const all1 = JSONPath({
+      path: "$.definitions[?(@.type)]..properties[?(['integer','number','boolean','string','object','array'].includes(@.type))].type",
+      json: schema,
+      resultType: 'pointer'
+    });
+
+    console.log(values);
+    console.log(all1);
   }
 
   convert(jsonSchema) {
@@ -156,6 +256,7 @@ class JsonSchemaToOpenApi {
         p.parent.remove(schema);
       }
     });
+    // console.log(JSON.stringify(schema, null, ' '));
     return schema;
   }
 }
@@ -179,7 +280,7 @@ class Pointer {
 
   set(obj, value) {
     // Sets a new value on object at the location described by pointer.
-    console.log('this.string() -> ', this.toString());
+    // console.log('this.string() -> ', this.toString());
     pointer.set(obj, this.toString(), value);
   }
 
@@ -198,6 +299,7 @@ class Pointer {
 }
 
 const converter = new JsonSchemaToOpenApi();
-const result = converter.convert(require('./test.json'));
+const result = converter.convert(require('./json.json'));
+const result2 = converter.purgeObject(result);
 
-console.log(JSON.stringify(result, null, ' '));
+// console.log(JSON.stringify(result, null, ' '));

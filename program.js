@@ -1,3 +1,4 @@
+const fs = require('fs');
 const resolve = require('path').resolve;
 
 const TJS = require('typescript-json-schema');
@@ -23,6 +24,4 @@ const schema = TJS.generateSchema(program, '*', settings);
 
 console.log(JSON.stringify(schema, null, " "));
 
-module.exports = {
-    schema
-};
+fs.writeFileSync( './json.json', JSON.stringify(schema, null, " ") );
