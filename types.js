@@ -55,6 +55,7 @@ class JsonSchemaToOpenApi {
       'maxProperties'
     ];
     this.properties = {
+      // 'required', 'properties', 'readOnly','format','writeOnly',
       string: ['minLength', 'maxLength', 'format'],
       number: [
         'multipleOf',
@@ -73,57 +74,18 @@ class JsonSchemaToOpenApi {
       array: ['uniqueItems', 'maxItems', 'minItems', 'items'],
       object: ['maxProperties', 'minProperties', 'additionalProperties']
     };
-    this.paths = [
-      '$.definitions[?(@.type)]..properties[?(@.type || @.anyOf)]',
-      '$.definitions[?(@.type)]..properties[?(@.type || @.anyOf)].title',
-      '$.definitions[?(@.type)]..properties[?(@.type || @.anyOf)].description',
-      "$.definitions[?(@.type)]..properties[?(['integer','number','boolean','string','object','array'].includes(@.type))]",
-      "$.definitions[?(@.type)]..properties[?(['integer','number','boolean','string','object','array'].includes(@.type))].type",
-      '$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf',
-      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number','boolean','string','object','array'].includes(@.type))]",
-      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number','boolean','string','object','array'].includes(@.type))].type",
-
-      "$.definitions[?(@.type)]..properties[?(['integer','number'].includes(@.type))].minimum",
-      "$.definitions[?(@.type)]..properties[?(['integer','number'].includes(@.type))].maximum",
-      "$.definitions[?(@.type)]..properties[?(['integer','number'].includes(@.type))].multipleOf",
-      "$.definitions[?(@.type)]..properties[?(['integer','number'].includes(@.type))].exclusiveMaximum",
-      "$.definitions[?(@.type)]..properties[?(['integer','number'].includes(@.type))].exclusiveMinimum",
-      "$.definitions[?(@.type)]..properties[?(['integer','number'].includes(@.type))].maximum",
-      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number'].includes(@.type))].minimum",
-      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number'].includes(@.type))].exclusiveMinimum",
-      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number'].includes(@.type))].exclusiveMaximum",
-      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number'].includes(@.type))].multipleOf",
-      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number'].includes(@.type))].minimum",
-      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number'].includes(@.type))].maximum",
-
-      "$.definitions[?(@.type)]..properties[?(['string'].includes(@.type))].minLength",
-      "$.definitions[?(@.type)]..properties[?(['string'].includes(@.type))].maxLength",
-      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['string'].includes(@.type))].minLength",
-      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['string'].includes(@.type))].maxLength",
-
-      "$.definitions[?(@.type)]..properties[?(['array'].includes(@.type))].items",
-      "$.definitions[?(@.type)]..properties[?(['array'].includes(@.type))].minItems",
-      "$.definitions[?(@.type)]..properties[?(['array'].includes(@.type))].maxItems",
-      "$.definitions[?(@.type)]..properties[?(['array'].includes(@.type))].uniqueItems",
-      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['array'].includes(@.type))].uniqueItems",
-      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['array'].includes(@.type))].maxItems",
-      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['array'].includes(@.type))].minItems",
-      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['array'].includes(@.type))].items",
-
-      "$.definitions[?(@.type)]..properties[?(['object'].includes(@.type))].maxProperties",
-      "$.definitions[?(@.type)]..properties[?(['object'].includes(@.type))].minProperties",
-      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['array'].includes(@.type))].minProperties",
-      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['array'].includes(@.type))].maxProperties"
-    ];
 
     // Generar archivo .json
-    this.createFile();
-
-    // validar los atributos del objeto
-    // this.purgeObject();
+    // this.createFile();
 
     // // validar los atributos de properties
     // this.validateProperties();
+
+    // 
+    const result = this.convert(require('./json.json'));
+    console.log(JSON.stringify(result, null, ' '));
+    // 
+    this.purgeObject(result);
   }
 
   createFile() {
@@ -149,18 +111,16 @@ class JsonSchemaToOpenApi {
   }
 
   purgeObject(schema) {
-    const paths = [];
-    for (const property in this.properties) {
-      this.properties[property].forEach((e) => {
-        paths.push(
-          `$.definitions[?(@.type)]..properties[?(['${property}'].includes(@.type))].${e}`
-        );
-        paths.push(
-          `$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['${property}'].includes(@.type))].${e}`
-        );
-      });
-    }
-    paths.push(
+    const allPaths = [
+      // '$.definitions[?(@.type)]',
+      '$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf',
+      '$.definitions[?(@.type)]..properties[?(@.type || @.anyOf)]',
+      "$.definitions[?(@.type)]..properties[?(['integer','number','boolean','string','object','array'].includes(@.type))]",
+      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number','boolean','string','object','array'].includes(@.type))]",
+      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number','boolean','string','object','array'].includes(@.type))].type"
+    ];
+    const validPaths = [];
+    validPaths.push(
       '$.definitions[?(@.type)]..properties[?(@.type || @.anyOf)]',
       '$.definitions[?(@.type)]..properties[?(@.type || @.anyOf)].title',
       '$.definitions[?(@.type)]..properties[?(@.type || @.anyOf)].description',
@@ -168,7 +128,7 @@ class JsonSchemaToOpenApi {
       "$.definitions[?(@.type)]..properties[?(['integer','number','boolean','string','object','array'].includes(@.type))].type",
       '$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf',
       "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number','boolean','string','object','array'].includes(@.type))]",
-      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number','boolean','string','object','array'].includes(@.type))].type",
+      "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number','boolean','string','object','array'].includes(@.type))].type"
       // "$.definitions[?(@.type)]..properties[?(['integer','number','boolean','string','object','array'].includes(@.type))].readOnly",
       // "$.definitions[?(@.type)]..properties[?(['integer','number','boolean','string','object','array'].includes(@.type))].format",
       // "$.definitions[?(@.type)]..properties[?(['integer','number','boolean','string','object','array'].includes(@.type))].writeOnly",
@@ -176,10 +136,21 @@ class JsonSchemaToOpenApi {
       // "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number','boolean','string','object','array'].includes(@.type))].format",
       // "$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number','boolean','string','object','array'].includes(@.type))].writeOnly"
     );
+    for (const property in this.properties) {
+      this.properties[property].forEach((e) => {
+        validPaths.push(
+          `$.definitions[?(@.type)]..properties[?(['${property}'].includes(@.type))].${e}`
+        );
+        validPaths.push(
+          `$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['${property}'].includes(@.type))].${e}`
+        );
+      });
+    }
+    
     // console.log(JSON.stringify(schema, null, ' '));
-    // console.log(paths);
+    // console.log(validPaths);
     const values = [];
-    paths.forEach((e) => {
+    validPaths.forEach((e) => {
       const valid = JSONPath({
         path: e,
         json: schema,
@@ -192,14 +163,27 @@ class JsonSchemaToOpenApi {
       }
     });
 
-    const all1 = JSONPath({
-      path: "$.definitions[?(@.type)]..properties[?(['integer','number','boolean','string','object','array'].includes(@.type))].type",
-      json: schema,
-      resultType: 'pointer'
+    const allValues = [];
+    allPaths.forEach((e) => {
+      const validPaths = JSONPath({
+        path: e,
+        json: schema,
+        resultType: 'pointer'
+      });
+      if (validPaths.length) {
+        validPaths.forEach((p) => {
+          !allValues.includes(p) ? allValues.push(p) : false;
+        });
+      }
     });
-
     console.log(values);
-    console.log(all1);
+    console.log(allValues);
+
+    allValues.forEach((e) => {
+      if (!values.includes(e)) {
+        pointer.remove(schema, e);
+      }
+    });
   }
 
   convert(jsonSchema) {
@@ -298,8 +282,8 @@ class Pointer {
   }
 }
 
-const converter = new JsonSchemaToOpenApi();
-const result = converter.convert(require('./json.json'));
-const result2 = converter.purgeObject(result);
+// const converter = new JsonSchemaToOpenApi();
+// const result = converter.convert(require('./json.json'));
+// const result2 = converter.purgeObject(result);
 
 // console.log(JSON.stringify(result, null, ' '));

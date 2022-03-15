@@ -10,6 +10,15 @@ $.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf
 $.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number','boolean','string','object','array'].includes(@.type))]
 $.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number','boolean','string','object','array'].includes(@.type))].type
 
+
+$.definitions[?(@.type)]..properties[?(['integer','number','boolean','string','object','array'].includes(@.type))].readOnly
+$.definitions[?(@.type)]..properties[?(['integer','number','boolean','string','object','array'].includes(@.type))].format
+$.definitions[?(@.type)]..properties[?(['integer','number','boolean','string','object','array'].includes(@.type))].writeOnly
+$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number','boolean','string','object','array'].includes(@.type))].readOnly
+$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number','boolean','string','object','array'].includes(@.type))].format
+$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number','boolean','string','object','array'].includes(@.type))].writeOnly
+
+
 // integers and numbers
 $.definitions[?(@.type)]..properties[?(['integer','number'].includes(@.type))].minimum
 $.definitions[?(@.type)]..properties[?(['integer','number'].includes(@.type))].maximum
@@ -23,13 +32,6 @@ $.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number'].in
 $.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number'].includes(@.type))].multipleOf
 $.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number'].includes(@.type))].minimum
 $.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number'].includes(@.type))].maximum
-
-$.definitions[?(@.type)]..properties[?(['integer','number','boolean','string','object','array'].includes(@.type))].readOnly
-$.definitions[?(@.type)]..properties[?(['integer','number','boolean','string','object','array'].includes(@.type))].format
-$.definitions[?(@.type)]..properties[?(['integer','number','boolean','string','object','array'].includes(@.type))].writeOnly
-$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number','boolean','string','object','array'].includes(@.type))].readOnly
-$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number','boolean','string','object','array'].includes(@.type))].format
-$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(['integer','number','boolean','string','object','array'].includes(@.type))].writeOnly
 
 // String
 $.definitions[?(@.type)]..properties[?(['string'].includes(@.type))].minLength
