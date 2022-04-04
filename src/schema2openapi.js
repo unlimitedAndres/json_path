@@ -1,6 +1,7 @@
 const { JSONPath } = require('jsonpath-plus');
 const pointer = require('json-pointer');
 const { PROPERTIES } = require('./lib/Constants');
+require('colors');
 
 module.exports = function (schema) {
   const allPaths = [
@@ -10,7 +11,8 @@ module.exports = function (schema) {
     '$.definitions[?(@.type)]..properties[?(@.type || @.anyOf)].*',
     '$.definitions[?(@.type)]..properties[?(@.type)]',
     '$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(@.type)]',
-    '$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(@.type)].type'
+    '$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(@.type)].type',
+    '$.definitions[?(@.type)]..properties[?(@.anyOf)].anyOf[?(@.type)].*'
   ];
   const validPaths = [
     '$.definitions[?(@.type)]',
@@ -74,13 +76,14 @@ module.exports = function (schema) {
   allValues.forEach((e) => {
     if (!values.includes(e)) {
       try {
-        console.log(e);
+        console.log(e.red);
         pointer.remove(schema, e);
       } catch (error) {
-        console.log('Already deleted');
+        console.log('Already deleted'.blue);
       }
     }
   });
+  console.log('\n----------------------------------------\n');
 
   // console.log( schema['definitions']['Node']['properties']['userId2']['anyOf'][2] );
   return schema['definitions'];

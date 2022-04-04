@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "colors": "^1.4.0",
     "json-pointer": "^0.6.1",
     "jsonpath-plus": "^6.0.1",
     "typescript-json-schema": "^0.53.0",

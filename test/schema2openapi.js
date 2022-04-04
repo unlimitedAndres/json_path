@@ -1,7 +1,6 @@
 const resolve = require('path').resolve;
 const ts2schema = require('../src/ts2schema');
 const schema2openapi = require('../src/schema2openapi');
-const { type } = require('os');
 
 const validSchema = {
   Root: {
@@ -288,7 +287,7 @@ const schema2 = {
   }
 };
 
-// -> Node/properties/userId2/anyOf/ -> type: 'string' -> minimum: 0
+
 // -> Node/properties/id2/ -> type: 'number' -> maxLength: 3
 // -> Node/properties/completed/ -> type: 'boolean' -> minimum: 0
 const schema3 = {
@@ -364,8 +363,7 @@ const schema3 = {
               minimum: 0
             },
             {
-              type: 'string',
-              minimum: 0
+              type: 'string'
             }
           ]
         },
@@ -386,12 +384,114 @@ const schema3 = {
   }
 };
 
-const file = resolve('test.ts');
-let schema = ts2schema([file]);
+// -> Node/properties/userId2/anyOf/ -> type: 'string' -> minimum: 0
+const schema4 = {
+  $schema: 'http://json-schema.org/draft-07/schema#',
+  definitions: {
+    Root: {
+      type: 'object',
+      properties: {
+        userId: {
+          description: 'The size of the shape.',
+          anyOf: [
+            {
+              type: 'integer',
+              minimum: 0
+            },
+            {
+              type: 'string'
+            }
+          ]
+        },
+        id: {
+          type: 'number'
+        },
+        title: {
+          type: 'string'
+        },
+        completed: {
+          type: 'boolean'
+        },
+        node: {
+          anyOf: [
+            {
+              $ref: '#/definitions/Node'
+            },
+            {
+              type: 'string'
+            },
+            {
+              type: 'boolean'
+            }
+          ]
+        },
+        myarray: {
+          anyOf: [
+            {
+              type: 'array',
+              items: {
+                type: 'string'
+              }
+            },
+            {
+              type: 'array',
+              items: {
+                type: 'boolean'
+              }
+            },
+            {
+              type: 'string'
+            }
+          ]
+        }
+      },
+      required: ['completed', 'id', 'myarray', 'node', 'title', 'userId']
+    },
+    Node: {
+      type: 'object',
+      properties: {
+        userId2: {
+          description: 'The size of the shape.',
+          anyOf: [
+            {
+              type: 'integer',
+              minimum: 0
+            },
+            {
+              type: 'string',
+              minimun: 0
+            }
+          ]
+        },
+        id2: {
+          type: 'number',
+        },
+        title2: {
+          type: 'string'
+        },
+        completed2: {
+          type: 'boolean',
+        }
+      },
+      required: ['completed2', 'id2', 'title2', 'userId2']
+    },
+  }
+};
+
+// const file = resolve('test.ts');
+// const file2 = resolve('test2.ts');
+// const file3 = resolve('test3.ts');
+// const file4 = resolve('test4.ts');
+
+// let schema_1 = ts2schema([file]);
+// let schema_2 = ts2schema([file2]);
+// let schema_3 = ts2schema([file3]);
+// let schema_4 = ts2schema([file4]);
 
 const proccessedSchema1 = schema2openapi(schema1);
 const proccessedSchema2 = schema2openapi(schema2);
 const proccessedSchema3 = schema2openapi(schema3);
+const proccessedSchema4 = schema2openapi(schema4);
 
 // schema = schema2openapi( schema1 );
 
@@ -407,8 +507,14 @@ console.log(
     JSON.stringify(proccessedSchema2, null, 2)
 );
 
-console.log(JSON.stringify(proccessedSchema3, null, 2));
+// console.log(JSON.stringify(proccessedSchema3, null, 2));
 console.log(
   JSON.stringify(validSchema, null, 2) ===
     JSON.stringify(proccessedSchema3, null, 2)
+);
+
+// console.log(JSON.stringify(proccessedSchema4, null, 2));
+console.log(
+  JSON.stringify(validSchema, null, 2) ===
+    JSON.stringify(proccessedSchema4, null, 2)
 );
